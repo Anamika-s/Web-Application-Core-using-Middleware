@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,6 +10,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebApplicationCore.Context;
+using WebApplicationCore.IRepository;
+using WebApplicationCore.Repository;
 
 namespace WebApplicationCore
 {
@@ -24,6 +28,15 @@ namespace WebApplicationCore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // We have to register services here
+            // Also we can set their lifetime
+            //services.AddSingleton(); // There will  be 1 instance for entire application
+            //services.AddScoped(); // There will  be 1 instance for one scope
+            //services.AddTransient();//  There will  be 1 instance for ever//y request
+
+            services.AddScoped<IStudentRepo, StudentRepo>();
+
+            services.AddDbContext<AppDbContext>(op => op.UseSqlServer(Configuration["ConnectionStrings:MyConnection"]));
             services.AddControllersWithViews();
         }
 
@@ -42,7 +55,7 @@ namespace WebApplicationCore
             }
             app.UseHttpsRedirection();
             //app.UseDefaultFiles();
-            //app.UseStaticFiles();
+             app.UseStaticFiles();
 
             //app.UseFileServer();
           
@@ -58,21 +71,21 @@ namespace WebApplicationCore
             //{
             //    await context.Response.WriteAsync("Hello 2");
             //});
-            app.Run(async context =>
-            {
-                await context.Response.WriteAsync(Configuration["Name"]); 
-            });
-            app.Use(async (context, next) =>
-            {
-                await context.Response.WriteAsync("1");
-                await next();
-            });
+           // app.Run(async context =>
+           // {
+           //     await context.Response.WriteAsync(Configuration["Name"]); 
+           // });
+           // app.Use(async (context, next) =>
+           // {
+           //     await context.Response.WriteAsync("1");
+           //     await next();
+           // });
 
-            app.Use(async (context, next) =>
-           {
-               await context.Response.WriteAsync("2");
-               await next();
-           });
+           // app.Use(async (context, next) =>
+           //{
+           //    await context.Response.WriteAsync("2");
+           //    await next();
+           //});
 
             app.Map("/newBranch", context =>
             {
